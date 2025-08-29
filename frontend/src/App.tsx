@@ -45,6 +45,7 @@ function DriveNode({ data }: { data: DriveData }) {
         position={Position.Right}
         className="!-right-2 h-2 w-2 bg-slate-500"
       />
+
     </div>
   );
 }
@@ -119,6 +120,7 @@ export default function App() {
         nodeTypes={nodeTypes}
         fitView
       />
+
     </div>
   );
 }
