@@ -1,65 +1,47 @@
-import { useEffect } from "react";
-import ReactFlow, { Background, type Edge, type Node } from "reactflow";
-import "reactflow/dist/style.css";
-import ELK from "elkjs/lib/elk.bundled.js";
-import { Circle, Square } from "lucide-react";
+import { KeyRound, PlugZap, Usb } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { useFlowStore } from "@/store";
+interface DriveProps {
+  label: string;
+  secret?: boolean;
+}
 
-// Instance of the ELK layout engine.
-const elk = new ELK();
-
-// Starting nodes and edges. Icons help prove lucide-react works.
-const initialNodes: Node[] = [
-  { id: "1", data: { label: "Circle", icon: Circle }, position: { x: 0, y: 0 }, type: "icon" },
-  { id: "2", data: { label: "Square", icon: Square }, position: { x: 0, y: 0 }, type: "icon" },
-];
-const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
-
-// Custom node renderer that shows an icon and label.
-function IconNode({ data }: { data: { label: string; icon: React.ComponentType<{ className?: string }> } }) {
-  const Icon = data.icon;
+function UsbDrive({ label, secret }: DriveProps) {
   return (
-    <div className="flex items-center gap-2 rounded-md bg-white px-2 py-1 shadow">
-      <Icon className="h-4 w-4" />
-      <span>{data.label}</span>
+    <div className="relative flex items-center gap-1 rounded-sm border border-slate-400 bg-slate-200 px-2 py-1 text-xs">
+      <Usb className="h-4 w-4" />
+      <span>{label}</span>
+      {secret && (
+        <KeyRound className="absolute -right-1 -top-1 h-3 w-3 text-red-500" />
+      )}
     </div>
   );
 }
-const nodeTypes = { icon: IconNode };
 
 export default function App() {
-  const { nodes, edges, setElements } = useFlowStore();
-
-  useEffect(() => {
-    // Use ELK to compute a tidy layout so nodes aren't overlapping.
-    const graph = {
-      id: "root",
-      layoutOptions: { "elk.algorithm": "layered" },
-      children: initialNodes.map((n) => ({ id: n.id, width: 80, height: 40 })),
-      edges: initialEdges.map((e) => ({ id: e.id, sources: [e.source], targets: [e.target] })),
-    };
-
-    elk.layout(graph).then((g) => {
-      const laidOut = initialNodes.map((n) => {
-        const node = g.children?.find((c: any) => c.id === n.id);
-        return { ...n, position: { x: node?.x || 0, y: node?.y || 0 } };
-      });
-      setElements(laidOut, initialEdges);
-    });
-  }, [setElements]);
-
   return (
-    <div className="h-screen w-screen">
-      {/* Button from shadcn/ui to reset the demo graph */}
-      <div className="p-2">
-        <Button onClick={() => setElements(initialNodes, initialEdges)}>Reset Layout</Button>
+    <div className="flex h-screen items-center justify-center bg-slate-100">
+      <div className="relative">
+        <div className="flex h-64 w-64 items-center justify-center rounded border-4 border-slate-500 bg-white text-xl font-bold">
+          Pod
+        </div>
+
+        <div className="absolute left-0 top-8 -translate-x-full flex items-center">
+          <UsbDrive label="ConfigMap" />
+          <div className="h-2 w-4 bg-slate-500" />
+        </div>
+
+        <div className="absolute left-0 top-32 -translate-x-full flex items-center">
+          <UsbDrive label="Secret" secret />
+          <div className="h-2 w-4 bg-slate-500" />
+        </div>
+
+        <div className="absolute right-0 top-28 translate-x-full flex items-center">
+          <div className="h-1 w-24 bg-yellow-400 animate-pulse" />
+          <div className="ml-2 flex h-12 w-12 items-center justify-center rounded-full border-2 border-yellow-400 bg-white">
+            <PlugZap className="h-6 w-6 text-yellow-500" />
+          </div>
+        </div>
       </div>
-      {/* React Flow renders the interactive canvas */}
-      <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView>
-        <Background />
-      </ReactFlow>
     </div>
   );
 }
